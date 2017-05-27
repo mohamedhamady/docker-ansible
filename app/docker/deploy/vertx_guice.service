@@ -1,0 +1,13 @@
+[Unit]
+Description=start vertx guice
+Requires=network.target
+
+[Service]
+ExecStart=/opt/jdk8/bin/java -jar -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.port=9200 -Dvertx.metrics.options.jmxEnabled=true -Dvertx.metrics.options.jmxDomain=vertx -Dvertx.metrics.options.registryName=vertx-metric-registry /build/vertx-guice-fat.jar
+Restart=always
+RestartSec=10
+StandardOutput=syslog
+StandardError=syslog
+
+[Install]
+WantedBy=multi-user.target

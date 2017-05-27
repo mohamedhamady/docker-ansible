@@ -1,0 +1,33 @@
+build:
+  cap_add:
+    - SYS_ADMIN
+  build: ../
+  dockerfile: docker/build/Dockerfile
+  volumes:
+    - ~/.m2/repository/:/root/.m2/repository/
+    - /build
+
+deploy:
+  cap_add:
+    - SYS_ADMIN
+  build: ../
+  dockerfile: docker/deploy/Dockerfile
+  volumes_from:
+    - build
+  expose:
+    - "8080"
+  hostname: app
+  entrypoint: []
+  command: ["/usr/sbin/init"]
+
+agent:
+  cap_add:
+    - SYS_ADMIN
+  image: local/ansible
+  volumes:
+    - /opt/workspace/training/docker-ansible/app/ansible/probe.yml:/ansible/site.yml
+  links:
+    - deploy
+  environment:
+    PROBE_HOST: "app"
+    PROBE_PORT: "8080"

@@ -1,0 +1,5 @@
+{
+    "name": "vertx_guice",
+    "version" : "1.0.0", 
+    "Description" : "Vertx app with guice"
+}
