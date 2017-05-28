@@ -11,3 +11,5 @@ EXPOSE 8080 9200
 
 ENTRYPOINT ["entrypoint.sh"]
 CMD ["/usr/sbin/init"]
+
+LABEL application=vertx-guice

@@ -12,3 +12,5 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 WORKDIR /opt/app
 
 ENTRYPOINT ["entrypoint.sh"]
+
+LABEL application=vertx-guice

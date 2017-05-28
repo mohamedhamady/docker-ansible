@@ -1,6 +1,7 @@
 # Project vars
 PROJECT_NAME ?= vertx-guice
 PROJECT_VERSION ?= 1.0.0
+REPO_NAME ?= vertx-guice
 
 # Filenames
 DOCKER_COMPOSE_FILE := docker/docker-compose.yml
@@ -11,24 +12,36 @@ PROJECT := $(PROJECT_NAME)-$(PROJECT_VERSION)$(BUILD_ID)
 .PHONY: build deploy test
 
 prepare:
-	echo "Preparing image"
+	${INFO} "Preparing image"
 
 build:
-	echo "Building application ..."
+	${INFO} "Building application ..."
 	docker-compose -p $(PROJECT) -f $(DOCKER_COMPOSE_FILE) up build
-	echo "Building application done successfully."
+	${INFO} "Building application done successfully."
 
 deploy:
-	echo "Deploying application ..."
+	${INFO} "Deploying application ..."
 	docker-compose  -p $(PROJECT) -f $(DOCKER_COMPOSE_FILE) up build
-	echo "Deploying application done successfully."
+	${INFO} "Deploying application done successfully."
 
 test:
-	echo "Testing application ..."
+	${INFO} "Testing application ..."
 	docker-compose -p $(PROJECT) -f $(DOCKER_COMPOSE_FILE) up agent
-	echo "Testing application done successfully."
+	${INFO} "Testing application done successfully."
 
 clean:
-	echo "Cleaning ..."
+	${INFO} "Cleaning ..."
 	docker-compose -p $(PROJECT) -f $(DOCKER_COMPOSE_FILE) down
-	echo "Cleaning done."
+	docker images -q  -f dangling=true | xargs -I ARGS docker rmi -f ARGS
+	docker volume ls -q -f dangling=true | xargs -I ARGS docker volume rm ARGS
+	${INFO} "Cleaning done."
+# docker images -q  -f dangling=true -f label=application=$(REPO_NAME)| xargs -I ARGS docker rmi -f ARGS
+
+# Costmetics
+YELLOW := "\e[1;33m"
+NC := "\e[0M"
+
+INFO := @bash -c '\
+  printf $(YELLOW); \
+  echo "=> $$1"; \
+  printf $(NC)' VALUE
