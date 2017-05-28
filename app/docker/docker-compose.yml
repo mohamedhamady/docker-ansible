@@ -1,30 +1,40 @@
-build:
-  cap_add:
-    - SYS_ADMIN
-  build: ../
-  dockerfile: docker/build/Dockerfile
-  volumes:
-    - ~/.m2/repository/:/root/.m2/repository/
+version: '2.1'
 
-deploy:
-  cap_add:
-    - SYS_ADMIN
-  build: ../
-  dockerfile: docker/deploy/Dockerfile
-  expose:
-    - "8080"
-  hostname: app
-  entrypoint: []
-  command: ["/usr/sbin/init"]
+volumes:
+  M2_REPO:
+    external: true
 
-agent:
-  cap_add:
-    - SYS_ADMIN
-  build: ../
-  dockerfile: ansible/Dockerfile
-  links:
-    - deploy
-  environment:
-    PROBE_HOST: "app"
-    PROBE_PORT: "8080"
-  command: ["probe.yml"]
+services:
+  build:
+    cap_add:
+      - SYS_ADMIN
+    build: 
+      context: ../
+      dockerfile: docker/build/Dockerfile
+    volumes:
+      - M2_REPO:/root/.m2/repository/
+
+  deploy:
+    cap_add:
+      - SYS_ADMIN
+    build: 
+      context: ../
+      dockerfile: docker/deploy/Dockerfile
+    expose:
+      - "8080"
+    hostname: app
+    entrypoint: []
+    command: ["/usr/sbin/init"]
+
+  agent:
+    cap_add:
+      - SYS_ADMIN
+    build: 
+      context: ../
+      dockerfile: ansible/Dockerfile
+    links:
+      - deploy
+    environment:
+      PROBE_HOST: "app"
+      PROBE_PORT: "8080"
+    command: ["probe.yml"]

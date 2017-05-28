@@ -15,13 +15,14 @@ CHECK := @bash -c '\
   if [[ $(INSPECT) -ne 0 ]]; \
   then exit $(INSPECT); fi' VALUE 
 
-.PHONY: build deploy test
+.PHONY: prepare build deploy test
 
 prepare:
 	${INFO} "Preparing image"
 
 build:
 	${INFO} "Building application ..."
+	docker volume create --name=M2_REPO
 	docker-compose -p $(PROJECT) -f $(DOCKER_COMPOSE_FILE) build build
 	docker-compose -p $(PROJECT) -f $(DOCKER_COMPOSE_FILE) up build
 	docker cp $$(docker-compose -p $(PROJECT) -f $(DOCKER_COMPOSE_FILE) ps -q build):/opt/app/target/. target
@@ -31,14 +32,15 @@ build:
 deploy:
 	${INFO} "Deploying application ..."
 	docker-compose -p $(PROJECT) -f $(DOCKER_COMPOSE_FILE) build deploy
-	docker-compose  -p $(PROJECT) -f $(DOCKER_COMPOSE_FILE) run --rm deploy 
+	docker-compose  -p $(PROJECT) -f $(DOCKER_COMPOSE_FILE) run -d --rm deploy 
 	${INFO} "Deploying application done successfully."
 
 test:
 	${INFO} "Testing application ..."
 	docker-compose -p $(PROJECT) -f $(DOCKER_COMPOSE_FILE) run --rm agent
 	${INFO} "Testing application done successfully."
-
+all:
+	make build deploy test
 clean:
 	${INFO} "Cleaning ..."
 	docker-compose -p $(PROJECT) -f $(DOCKER_COMPOSE_FILE) down
