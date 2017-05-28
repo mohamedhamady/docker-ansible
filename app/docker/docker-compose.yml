@@ -5,7 +5,6 @@ build:
   dockerfile: docker/build/Dockerfile
   volumes:
     - ~/.m2/repository/:/root/.m2/repository/
-    - /build
 
 deploy:
   cap_add:

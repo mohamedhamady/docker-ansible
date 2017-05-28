@@ -9,6 +9,12 @@ DOCKER_COMPOSE_FILE := docker/docker-compose.yml
 # Docker project name
 PROJECT := $(PROJECT_NAME)-$(PROJECT_VERSION)$(BUILD_ID)
 
+INSPECT := $$(docker-compose -p $$1 -f $$2 ps -q $$3 | xargs -I ARGS docker inspect -f "{{ .State.ExitCode }}" ARGS)
+
+CHECK := @bash -c '\
+  if [[ $(INSPECT) -ne 0 ]]; \
+  then exit $(INSPECT); fi' VALUE 
+
 .PHONY: build deploy test
 
 prepare:
@@ -16,18 +22,21 @@ prepare:
 
 build:
 	${INFO} "Building application ..."
+	docker-compose -p $(PROJECT) -f $(DOCKER_COMPOSE_FILE) build build
 	docker-compose -p $(PROJECT) -f $(DOCKER_COMPOSE_FILE) up build
 	docker cp $$(docker-compose -p $(PROJECT) -f $(DOCKER_COMPOSE_FILE) ps -q build):/opt/app/target/. target
+	${CHECK} $(PROJECT) $(DOCKER_COMPOSE_FILE) build
 	${INFO} "Building application done successfully."
 
 deploy:
 	${INFO} "Deploying application ..."
-	docker-compose  -p $(PROJECT) -f $(DOCKER_COMPOSE_FILE)  up  --build deploy 
+	docker-compose -p $(PROJECT) -f $(DOCKER_COMPOSE_FILE) build deploy
+	docker-compose  -p $(PROJECT) -f $(DOCKER_COMPOSE_FILE) run --rm deploy 
 	${INFO} "Deploying application done successfully."
 
 test:
 	${INFO} "Testing application ..."
-	docker-compose -p $(PROJECT) -f $(DOCKER_COMPOSE_FILE) up agent
+	docker-compose -p $(PROJECT) -f $(DOCKER_COMPOSE_FILE) run --rm agent
 	${INFO} "Testing application done successfully."
 
 clean:
