@@ -17,11 +17,12 @@ prepare:
 build:
 	${INFO} "Building application ..."
 	docker-compose -p $(PROJECT) -f $(DOCKER_COMPOSE_FILE) up build
+	docker cp $$(docker-compose -p $(PROJECT) -f $(DOCKER_COMPOSE_FILE) ps -q build):/opt/app/target/. target
 	${INFO} "Building application done successfully."
 
 deploy:
 	${INFO} "Deploying application ..."
-	docker-compose  -p $(PROJECT) -f $(DOCKER_COMPOSE_FILE) up build
+	docker-compose  -p $(PROJECT) -f $(DOCKER_COMPOSE_FILE)  up  --build deploy 
 	${INFO} "Deploying application done successfully."
 
 test:
